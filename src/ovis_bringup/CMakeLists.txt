@@ -20,9 +20,5 @@ install(DIRECTORY
   config
   DESTINATION share/${PROJECT_NAME}
 )
-# Install Python scripts
-install(PROGRAMS
-  scripts/publish_trajectory.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+
 ament_package()
