@@ -20,6 +20,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_gmock REQUIRED)
+find_package(Boost REQUIRED COMPONENTS thread)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
@@ -30,6 +31,9 @@ link_directories(${PROJECT_SOURCE_DIR}/lib/${CMAKE_LIBRARY_ARCHITECTURE})
 include_directories(
   include
 )
+
+include_directories(${Boost_INCLUDE_DIRS})
+
 
 add_library(
   ovis_control
@@ -58,11 +62,14 @@ ament_target_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
   
-  target_include_directories(
+
+target_include_directories(
   ovis_control
   PUBLIC
   include
 )
+
+target_link_libraries(ovis_control ${Boost_LIBRARIES})
 
 # Install
 

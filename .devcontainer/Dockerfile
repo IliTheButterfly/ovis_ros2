@@ -33,7 +33,8 @@ RUN apt-get update && apt-get install -y \
     wget \
     lsb-release \
     gnupg \
-    curl
+    curl \
+    libboost-all-dev
 
 # Change user
 RUN chown $USER_UID:$USER_GID /workspace/$USERNAME
