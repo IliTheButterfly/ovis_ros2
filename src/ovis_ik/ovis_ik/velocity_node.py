@@ -1,9 +1,10 @@
 import numpy as np
 import rclpy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 from rclpy.node import Node
 from roboticstoolbox import DHRobot, RevoluteDH
 from sensor_msgs.msg import JointState
+from std_msgs.msg import Float64MultiArray
 
 
 class VelocityNode(Node):
@@ -11,18 +12,18 @@ class VelocityNode(Node):
         super().__init__('velocity_node')
 
         self.twist_sub = self.create_subscription(
-            Twist,
-            '/mouse_twist',
+            TwistStamped,
+            '/cmd_vel',
             self.twist_callback,
             10,
         )
         self.joint_sub = self.create_subscription(
             JointState,
-            '/robot_joint_states',
+            '/joint_states',
             self.joint_callback,
             10,
         )
-        self.vel_pub = self.create_publisher(JointState, '/robot_joint_velocities', 10)
+        self.vel_pub = self.create_publisher(Float64MultiArray, '/joint_vel', 10)
 
         # Joint naming and axis ordering are aligned with ovis_description URDF.
         # Joints: ovis_joint_1..6
@@ -64,14 +65,14 @@ class VelocityNode(Node):
             if len(msg.position) >= 6:
                 self.q = np.array(msg.position[:6])
 
-    def twist_callback(self, msg: Twist):
+    def twist_callback(self, msg: TwistStamped):
         self.latest_twist = np.array([
-            msg.linear.x,
-            msg.linear.y,
-            msg.linear.z,
-            msg.angular.x,
-            msg.angular.y,
-            msg.angular.z,
+            msg.twist.linear.x,
+            msg.twist.linear.y,
+            msg.twist.linear.z,
+            msg.twist.angular.x,
+            msg.twist.angular.y,
+            msg.twist.angular.z,
         ])
         self.compute_and_publish()
 
@@ -79,22 +80,30 @@ class VelocityNode(Node):
         jacobian = self.robot.jacob0(self.q)
         q_dot = np.linalg.pinv(jacobian) @ self.latest_twist
 
-        if np.any(np.abs(q_dot) > 2.0):
-            self.get_logger().warn('Joint velocity exceeded limit; command dropped.')
-            return
+        q_dot = q_dot[:6] * [1.0,1.0,1.0,1.0,-1.0,1.0]
 
-        out_msg = JointState()
-        out_msg.header.stamp = self.get_clock().now().to_msg()
-        out_msg.name = self.joint_names
-        out_msg.velocity = list(q_dot)
+        if np.any(np.abs(q_dot) > 2.0):
+            self.get_logger().warning('Joint velocity exceeded limit; command dropped.')
+            q_dot = np.zeros_like(q_dot)
+
+        out_msg = Float64MultiArray()
+        # out_msg.header.stamp = self.get_clock().now().to_msg()
+        # out_msg.name = self.joint_names
+        # out_msg.velocity = list(q_dot)
+        out_msg.layout.dim = []
+        out_msg.layout.data_offset = 0
+        out_msg.data = list(q_dot)
+        
         self.vel_pub.publish(out_msg)
 
 
 def main(args=None):
-    rclpy.init(args=args)
-    node = VelocityNode()
-    rclpy.spin(node)
-    node.destroy_node()
+    try:
+        rclpy.init(args=args)
+        node = VelocityNode()
+        rclpy.spin(node)
+    except InterruptedError:
+        pass
     rclpy.shutdown()
 
 

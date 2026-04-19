@@ -29,6 +29,7 @@ rosdep install --from-paths src --ignore-src -r -y
 `roboticstoolbox-python` is a pip dependency and typically not available as a standard Ubuntu/rosdep system package key.
 Install it manually:
 
+The numpy version is important for roboticstoolbox
 ```bash
-python3 -m pip install roboticstoolbox-python
+python3 -m pip install roboticstoolbox-python numpy==1.24.4
 ```

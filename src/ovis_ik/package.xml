@@ -4,7 +4,7 @@
   <name>ovis_ik</name>
   <version>0.1.0</version>
   <description>Inverse differential kinematics nodes for the Ovis arm.</description>
-  <maintainer email="dev@ovis.invalid">ovis</maintainer>
+  <maintainer email="capra@ens.etsmtl.ca">capra</maintainer>
   <license>MIT</license>
 
   <exec_depend>rclpy</exec_depend>
