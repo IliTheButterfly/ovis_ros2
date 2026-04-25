@@ -34,7 +34,8 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     gnupg \
     curl \
-    libboost-all-dev
+    libboost-all-dev \
+    python3-pip
 
 # Numpy version is important for robotics toolbox
 RUN python3 -m pip install roboticstoolbox-python numpy==1.24.4
