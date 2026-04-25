@@ -42,10 +42,10 @@ class VelocityNode(Node):
             [
                 RevoluteDH(d=0.10001, a=0.0, alpha=np.pi / 2),
                 RevoluteDH(d=0.0, a=-0.30039, alpha=np.pi),
-                RevoluteDH(d=0.0, a=0.0, alpha=np.pi / 2, offset=np.pi / 2),
+                RevoluteDH(d=0.0, a=0.0, alpha=-np.pi / 2, offset=-np.pi / 2),
                 RevoluteDH(d=0.33480, a=0.0, alpha=-np.pi / 2),
                 RevoluteDH(d=0.0, a=0.0, alpha=np.pi / 2),
-                RevoluteDH(d=0.07000, a=0.0, alpha=0.0),
+                RevoluteDH(d=0.33, a=0.0, alpha=0.0),
             ],
             name='ovis',
         )
@@ -77,12 +77,12 @@ class VelocityNode(Node):
         self.compute_and_publish()
 
     def compute_and_publish(self):
-        jacobian = self.robot.jacob0(self.q)
+        jacobian = self.robot.jacobe(self.q)
         q_dot = np.linalg.pinv(jacobian) @ self.latest_twist
 
-        q_dot = q_dot[:6] * [1.0,1.0,1.0,1.0,-1.0,1.0]
+        q_dot = q_dot[:6] * [1.0,1.0,1.0,1.0,1.0,1.0]
 
-        if np.any(np.abs(q_dot) > 2.0):
+        if np.any(np.abs(q_dot) > 4.0):
             self.get_logger().warning('Joint velocity exceeded limit; command dropped.')
             q_dot = np.zeros_like(q_dot)
 
