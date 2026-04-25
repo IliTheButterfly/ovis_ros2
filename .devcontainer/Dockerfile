@@ -36,6 +36,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     libboost-all-dev
 
+# Numpy version is important for robotics toolbox
+RUN python3 -m pip install roboticstoolbox-python numpy==1.24.4
+
 # Change user
 RUN chown $USER_UID:$USER_GID /workspace/$USERNAME
 USER $USERNAME
